@@ -1,4 +1,5 @@
-// Générer lignes obliques
+// -----------------------
+// Initialisation des lignes et particules
 for (let i = 0; i < 15; i++) {
   let line = document.createElement('div');
   line.className = 'line';
@@ -7,7 +8,6 @@ for (let i = 0; i < 15; i++) {
   document.body.appendChild(line);
 }
 
-// Particules fixes
 for (let i = 0; i < 50; i++) {
   let particle = document.createElement('div');
   particle.className = 'particle';
@@ -18,17 +18,19 @@ for (let i = 0; i < 50; i++) {
 
 const errorText = document.getElementById('error');
 
-// Variables secrets
+// -----------------------
+// Variables pour secrets
 let secretSequence = ['l','c','o'];
 let userSequence = [];
 let clickCount = 0;
 
-// Function pour créer messages secrets
+// -----------------------
+// Fonction pour créer messages secrets
 function spawnSecret(msg, color) {
   const secret = document.createElement('div');
   secret.className = 'secret';
-  secret.style.left = Math.random()*window.innerWidth+'px';
-  secret.style.top = Math.random()*window.innerHeight+'px';
+  secret.style.left = Math.random() * window.innerWidth + 'px';
+  secret.style.top = Math.random() * window.innerHeight + 'px';
   secret.style.color = color || '#00ffff';
   secret.textContent = msg || "Message secret...";
   document.body.appendChild(secret);
@@ -39,10 +41,10 @@ function spawnSecret(msg, color) {
 
 // -----------------------
 // 1. Texte qui se disperse
-function disperseText(){
+function disperseText() {
   const chars = errorText.textContent.split('');
   errorText.textContent = '';
-  chars.forEach((c, i)=>{
+  chars.forEach((c,i)=>{
     const span = document.createElement('span');
     span.textContent = c;
     span.style.display='inline-block';
@@ -57,29 +59,17 @@ function disperseText(){
 }
 
 // -----------------------
-// 2. Séquence de touches secrète
-document.addEventListener('keydown', e=>{
-  const key = e.key.toLowerCase();
-  userSequence.push(key);
-  if(userSequence.length > secretSequence.length) userSequence.shift();
-  if(userSequence.join('') === secretSequence.join('')){
-    spawnSecret("✨ Séquence secrète activée !", "#ff00ff");
-    // Secret combiné avec clics
-    if(clickCount>=3){
-      setTimeout(()=>window.location.href="secret.html", 1500);
-    }
-  }
-
-  // 4. Couleurs qui changent
-  if(key==='g') errorText.style.color = `hsl(${Math.random()*360}, 80%, 60%)`;
-});
-
-// -----------------------
 // 3. Explosion de particules
-function explodeParticles(){
+function explodeParticles() {
   for(let i=0;i<20;i++){
     spawnSecret("✨", `hsl(${Math.random()*360},80%,70%)`);
   }
+}
+
+// -----------------------
+// 4. Changer couleur texte
+function randomColorText() {
+  errorText.style.color = `hsl(${Math.random()*360},80%,60%)`;
 }
 
 // -----------------------
@@ -89,7 +79,7 @@ function miniMessage(){
 }
 
 // -----------------------
-// 7. Particules qui suivent le texte
+// 7. Particules autour du texte
 function particleTrail(){
   for(let i=0;i<10;i++){
     spawnSecret("•", `hsl(${Math.random()*360},70%,70%)`);
@@ -132,14 +122,45 @@ function spawnShape(){
 }
 
 // -----------------------
-// Clic sur texte principal
+// Gestion des clics
 errorText.addEventListener('click', ()=>{
   clickCount++;
+
+  // Effets principaux
   glitchEffect();
   explodeParticles();
   particleTrail();
   disperseText();
-  mirrorEffect();
+
+  // Effet miroir seulement après 3 clics
+  if(clickCount === 3) mirrorEffect();
+
+  // Formes cachées aléatoires
   spawnShape();
-  if(clickCount%5===0) miniMessage(); // tous les 5 clics
+
+  // Mini message tous les 5 clics
+  if(clickCount % 5 === 0) miniMessage();
+});
+
+// -----------------------
+// Gestion touches clavier
+document.addEventListener('keydown', (e)=>{
+  const key = e.key.toLowerCase();
+
+  // Ajouter à la séquence
+  userSequence.push(key);
+  if(userSequence.length > secretSequence.length) userSequence.shift();
+
+  // Vérifier séquence L+C+O
+  if(userSequence.join('') === secretSequence.join('')){
+    spawnSecret("✨ Séquence secrète activée !", "#ff00ff");
+
+    // Redirection si 3 clics faits
+    if(clickCount >= 3){
+      setTimeout(()=>window.location.href="secret.html", 1500);
+    }
+  }
+
+  // Couleur aléatoire sur touche "G"
+  if(key === 'g') randomColorText();
 });

@@ -7,7 +7,7 @@ for (let i = 0; i < 15; i++) {
   document.body.appendChild(line);
 }
 
-// Générer particules fixes
+// Particules fixes
 for (let i = 0; i < 50; i++) {
   let particle = document.createElement('div');
   particle.className = 'particle';
@@ -18,66 +18,128 @@ for (let i = 0; i < 50; i++) {
 
 const errorText = document.getElementById('error');
 
-// Variables pour easter eggs
-let secretSequence = ['l', 'c', 'o'];
+// Variables secrets
+let secretSequence = ['l','c','o'];
 let userSequence = [];
 let clickCount = 0;
 
-// Fonction pour créer messages secrets
-function spawnSecret(msg) {
+// Function pour créer messages secrets
+function spawnSecret(msg, color) {
   const secret = document.createElement('div');
   secret.className = 'secret';
-  secret.style.left = Math.random() * window.innerWidth + 'px';
-  secret.style.top = Math.random() * window.innerHeight + 'px';
+  secret.style.left = Math.random()*window.innerWidth+'px';
+  secret.style.top = Math.random()*window.innerHeight+'px';
+  secret.style.color = color || '#00ffff';
   secret.textContent = msg || "Message secret...";
   document.body.appendChild(secret);
-  setTimeout(() => (secret.style.opacity = 1), 50);
-  setTimeout(() => (secret.style.opacity = 0), 3000);
+  setTimeout(() => secret.style.opacity = 1, 50);
+  setTimeout(() => secret.style.opacity = 0, 3000);
   setTimeout(() => secret.remove(), 4000);
 }
 
-// Glitch et clic
-errorText.addEventListener('click', () => {
-  errorText.classList.add('glitch');
-  setTimeout(() => errorText.classList.remove('glitch'), 1000);
+// -----------------------
+// 1. Texte qui se disperse
+function disperseText(){
+  const chars = errorText.textContent.split('');
+  errorText.textContent = '';
+  chars.forEach((c, i)=>{
+    const span = document.createElement('span');
+    span.textContent = c;
+    span.style.display='inline-block';
+    span.style.transition='transform 0.5s, opacity 0.5s';
+    errorText.appendChild(span);
+    setTimeout(()=>{
+      span.style.transform = `translate(${(Math.random()-0.5)*100}px, ${(Math.random()-0.5)*100}px) rotate(${Math.random()*360}deg)`;
+      span.style.opacity = 0;
+    }, i*50);
+  });
+  setTimeout(()=>errorText.textContent = chars.join(''), 1000);
+}
 
-  spawnSecret();
-
-  // Compteur pour chemin secret
-  clickCount++;
-  if (clickCount > 5) clickCount = 5;
-});
-
-// Gestion touches clavier
-document.addEventListener('keydown', (e) => {
+// -----------------------
+// 2. Séquence de touches secrète
+document.addEventListener('keydown', e=>{
   const key = e.key.toLowerCase();
-
-  // Messages classiques
-  if (key === 'l') spawnSecret("L.C.O veille...");
-  if (key === 'o') spawnSecret("Oblique activated!");
-
-  // Ajouter à la séquence utilisateur
   userSequence.push(key);
-  if (userSequence.length > secretSequence.length) {
-    userSequence.shift(); // garder seulement les 3 dernières touches
-  }
-
-  // Vérifier séquence L+C+O
-  if (arraysEqual(userSequence, secretSequence)) {
-    spawnSecret("✨ Séquence L.C.O activée !");
-    for (let i = 0; i < 30; i++) spawnSecret("💠");
-
-    // Vérifier si chemin secret avec clics
-    if (clickCount >= 3) {
-      spawnSecret("🚪 Chemin secret découvert !");
-      setTimeout(() => {
-        window.location.href = "secret.html";
-      }, 1500);
+  if(userSequence.length > secretSequence.length) userSequence.shift();
+  if(userSequence.join('') === secretSequence.join('')){
+    spawnSecret("✨ Séquence secrète activée !", "#ff00ff");
+    // Secret combiné avec clics
+    if(clickCount>=3){
+      setTimeout(()=>window.location.href="secret.html", 1500);
     }
   }
+
+  // 4. Couleurs qui changent
+  if(key==='g') errorText.style.color = `hsl(${Math.random()*360}, 80%, 60%)`;
 });
 
-// Vérifier l'égalité de deux tableaux
-function arraysEqual(a, b) {
-  return a.length === b.length && a.every((val, index) => val === b[index]);
+// -----------------------
+// 3. Explosion de particules
+function explodeParticles(){
+  for(let i=0;i<20;i++){
+    spawnSecret("✨", `hsl(${Math.random()*360},80%,70%)`);
+  }
 }
+
+// -----------------------
+// 6. Mini texte caché
+function miniMessage(){
+  spawnSecret("🎉 Bien joué !", "#00ff00");
+}
+
+// -----------------------
+// 7. Particules qui suivent le texte
+function particleTrail(){
+  for(let i=0;i<10;i++){
+    spawnSecret("•", `hsl(${Math.random()*360},70%,70%)`);
+  }
+}
+
+// -----------------------
+// 8. Effet miroir
+function mirrorEffect(){
+  const clone = errorText.cloneNode(true);
+  clone.style.position='absolute';
+  clone.style.left = (window.innerWidth - errorText.offsetLeft - errorText.offsetWidth) + 'px';
+  clone.style.top = errorText.offsetTop + 'px';
+  clone.style.opacity = 0.3;
+  clone.style.transform = 'scaleX(-1)';
+  document.body.appendChild(clone);
+  setTimeout(()=>clone.remove(), 3000);
+}
+
+// -----------------------
+// 10. Glitch avancé
+function glitchEffect(){
+  errorText.classList.add('glitch');
+  setTimeout(()=>errorText.classList.remove('glitch'), 1000);
+}
+
+// -----------------------
+// 19. Formes cachées
+function spawnShape(){
+  const div = document.createElement('div');
+  div.style.position='absolute';
+  div.style.left = Math.random()*window.innerWidth+'px';
+  div.style.top = Math.random()*window.innerHeight+'px';
+  div.style.width = Math.random()*40+20+'px';
+  div.style.height = div.style.width;
+  div.style.backgroundColor = `rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255},0.2)`;
+  div.style.transform = `rotate(${Math.random()*360}deg)`;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),4000);
+}
+
+// -----------------------
+// Clic sur texte principal
+errorText.addEventListener('click', ()=>{
+  clickCount++;
+  glitchEffect();
+  explodeParticles();
+  particleTrail();
+  disperseText();
+  mirrorEffect();
+  spawnShape();
+  if(clickCount%5===0) miniMessage(); // tous les 5 clics
+});
